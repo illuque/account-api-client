@@ -10,8 +10,6 @@ import (
 	"time"
 )
 
-// TODO:I Test this
-
 type AccountClient interface {
 	Create(account model.AccountData) (createdAccount *model.AccountData, errorData *model.ErrorData)
 	Fetch(id string) (account *model.AccountData, errorData *model.ErrorData)
