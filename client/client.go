@@ -30,12 +30,12 @@ func NewAccountApiClient(uri string, timeout time.Duration) AccountClient {
 	logger := &logrus.Logger{
 		Out:   os.Stderr,
 		Level: logrus.DebugLevel,
-	} // TODO:I pintar timestamps
+	}
 
-	formatter := runtime.Formatter{ChildFormatter: &log.TextFormatter{}}
-	logger.SetFormatter(&formatter)
+	formatter := runtime.Formatter{ChildFormatter: &log.JSONFormatter{}}
 	formatter.Line = true
 	formatter.File = true
+	logger.SetFormatter(&formatter)
 
 	return AccountHttpClient{
 		httpClient: &http.Client{
