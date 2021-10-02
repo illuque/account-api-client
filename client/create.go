@@ -3,22 +3,18 @@ package client
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
-	"fmt"
 	"github.com/illuque/account-api-client/model"
 	"github.com/illuque/account-api-client/model/client_error"
 	"net/http"
 )
 
-type accountCreate struct {
+type accountCreate struct { // TODO:I ver si mover a common
 	AccountData model.AccountData `json:"data"`
 }
 
 // TODO:I leer si es mejor usar http.AccountClient{} o http.Post, etc.
 
 func (ac AccountHttpClient) Create(accountData model.AccountData) (createdAccount *model.AccountData, errorData *client_error.ErrorData) {
-	ac.logger.Info("Calling API for Create...")
-
 	accountCreateJson, err := json.Marshal(&accountCreate{AccountData: accountData})
 	if err != nil {
 		ac.logger.WithError(err).Errorf("Error marshaling input account data on Create")
@@ -26,29 +22,23 @@ func (ac AccountHttpClient) Create(accountData model.AccountData) (createdAccoun
 		return
 	}
 
-	ac.logger.Debugf("Payload to send [%s]", accountCreateJson)
+	ac.logger.Debugf("Calling API for Create with payload [%s]...", accountCreateJson)
 
-	response, err := ac.client.Post(ac.uri, ac.contentType, bytes.NewReader(accountCreateJson))
+	response, err := ac.httpClient.Post(ac.uri, ac.contentType, bytes.NewReader(accountCreateJson))
 	if err != nil {
-		ac.logger.WithError(err).Errorf("Error on account POST")
+		ac.logger.WithError(err).Errorf("Error sending POST to Account API")
 		errorData = client_error.NewUnknownClientError("Unknown error generating API request")
 		return
 	}
 
 	if response.StatusCode != http.StatusCreated {
-		apiErrMsg, _ := ac.ParseResponseBodyOnError(response)
-		errMsg := fmt.Sprintf("client_error status code '%d', message '%s'", response.StatusCode, apiErrMsg)
-		err = errors.New(errMsg)
-
-		errorData = client_error.NewFromApiError(response.StatusCode, apiErrMsg)
-
-		ac.logger.WithError(err).Errorf("API responded '%d' on Create", response.StatusCode)
+		errorData = ac.ProcessErrorResponse(response)
 		return
 	}
 
-	createdAccount, err = ac.ParseResponseBodyOnSuccess(response)
+	createdAccount, err = ac.GetAccountFromResponse(response)
 	if err != nil {
-		errorData = client_error.NewUnknownClientError("Unknown error parsing API response")
+		errorData = client_error.NewUnknownClientError("Unknown error parsing API POST response")
 		return
 	}
 

@@ -2,23 +2,35 @@ package client
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 	"github.com/illuque/account-api-client/model"
+	"github.com/illuque/account-api-client/model/client_error"
 	"io/ioutil"
 	"net/http"
 )
 
-func (ac AccountHttpClient) ParseResponseBodyOnSuccess(response *http.Response) (responseAccount *model.AccountData, parseError error) {
+func (ac AccountHttpClient) ProcessErrorResponse(response *http.Response) *client_error.ErrorData {
+	apiErrMsg, _ := ac.getErrorFromResponse(response)
+	errMsg := fmt.Sprintf("API error with code '%d', message '%s'", response.StatusCode, apiErrMsg)
+	err := errors.New(errMsg)
+	ac.logger.WithError(err).Errorf("API responded '%d' on Create", response.StatusCode)
+
+	return client_error.NewFromApiError(response.StatusCode, apiErrMsg)
+}
+
+func (ac AccountHttpClient) GetAccountFromResponse(response *http.Response) (responseAccount *model.AccountData, parseError error) {
 	defer response.Body.Close()
 
 	bodyBytes, parseError := ioutil.ReadAll(response.Body)
 	if parseError != nil {
-		ac.logger.WithError(parseError).Errorf("Error reading POST response")
+		ac.logger.WithError(parseError).Errorf("Error reading API response")
 		return
 	}
 
 	var accountResponseParsed accountCreate
 	if parseError = json.Unmarshal(bodyBytes, &accountResponseParsed); parseError != nil {
-		ac.logger.WithError(parseError).Errorf("Error unmarshaling POST response to AccountData")
+		ac.logger.WithError(parseError).Errorf("Error reading error response as AccountData")
 		return
 	}
 
@@ -27,12 +39,12 @@ func (ac AccountHttpClient) ParseResponseBodyOnSuccess(response *http.Response) 
 	return
 }
 
-func (ac AccountHttpClient) ParseResponseBodyOnError(response *http.Response) (errorMessage string, parseError error) {
+func (ac AccountHttpClient) getErrorFromResponse(response *http.Response) (errorMessage string, parseError error) {
 	defer response.Body.Close()
 
 	bodyBytes, parseError := ioutil.ReadAll(response.Body)
 	if parseError != nil {
-		ac.logger.WithError(parseError).Errorf("Error reading POST response")
+		ac.logger.WithError(parseError).Errorf("Error reading API response")
 		return
 	}
 

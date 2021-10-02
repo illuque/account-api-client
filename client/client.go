@@ -15,10 +15,11 @@ import (
 
 type AccountClient interface {
 	Create(account model.AccountData) (*model.AccountData, *client_error.ErrorData)
+	Fetch(id string) (*model.AccountData, *client_error.ErrorData)
 }
 
 type AccountHttpClient struct {
-	client      *http.Client
+	httpClient  *http.Client
 	uri         string
 	contentType string
 	logger      *logrus.Logger
@@ -36,7 +37,7 @@ func NewAccountApiClient(uri string, timeout time.Duration) AccountClient {
 	formatter.File = true
 
 	return AccountHttpClient{
-		client: &http.Client{
+		httpClient: &http.Client{
 			Timeout: timeout,
 		}, // TODO:I ver si hay una manera mejor de inicializarlo
 		uri:         uri,

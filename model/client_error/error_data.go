@@ -24,6 +24,14 @@ func NewBadRequest(message string) *ErrorData {
 	}
 }
 
+func NewNotFound(message string) *ErrorData {
+	return &ErrorData{
+		Code:      http.StatusNotFound,
+		Message:   message,
+		Retryable: true,
+	}
+}
+
 func NewConflict(message string) *ErrorData {
 	return &ErrorData{
 		Code:      http.StatusConflict,
@@ -34,6 +42,8 @@ func NewConflict(message string) *ErrorData {
 
 func NewFromApiError(code int, message string) *ErrorData {
 	switch code {
+	case http.StatusNotFound:
+		return NewNotFound(message)
 	case http.StatusBadRequest:
 		return NewBadRequest(message)
 	case http.StatusConflict:
