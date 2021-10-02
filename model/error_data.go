@@ -1,4 +1,4 @@
-package client_error
+package model
 
 import "net/http"
 
@@ -39,5 +39,3 @@ func NewConflict(message string) *ErrorData {
 		Retryable: false,
 	}
 }
-
-// TODO:I manejar resto de errores

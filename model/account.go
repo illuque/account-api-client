@@ -28,7 +28,3 @@ type AccountAttributes struct {
 	Status                  *string  `json:"status,omitempty"`
 	Switched                *bool    `json:"switched,omitempty"`
 }
-
-type ApiErrorBody struct {
-	Message string `json:"error_message,required"`
-}

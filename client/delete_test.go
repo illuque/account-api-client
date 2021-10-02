@@ -1,7 +1,7 @@
 package client
 
 import (
-	"github.com/illuque/account-api-client/model/client_error"
+	"github.com/illuque/account-api-client/model"
 	"reflect"
 	"testing"
 	"time"
@@ -11,7 +11,7 @@ func TestAccountHttpClient_Delete(t *testing.T) {
 	accountHttpClient := NewAccountApiClient("http://localhost:8080/v1/organisation/accounts", 2*time.Second)
 
 	type args struct {
-		id      string
+		id      model.DeleteId
 		version int64
 	}
 
@@ -21,13 +21,12 @@ func TestAccountHttpClient_Delete(t *testing.T) {
 		name          string
 		args          args
 		wantDeleted   bool
-		wantErrorData *client_error.ErrorData
+		wantErrorData *model.ErrorData
 	}{
 		{
 			name: "removed correctly when existing for id and versions",
 			args: args{
-				id:      account.ID,
-				version: *account.Version,
+				id: model.DeleteId{Id: account.ID, Version: *account.Version},
 			},
 			wantDeleted:   true,
 			wantErrorData: nil,
@@ -35,20 +34,18 @@ func TestAccountHttpClient_Delete(t *testing.T) {
 		{
 			name: "not found when non existing id",
 			args: args{
-				id:      account.ID,
-				version: *account.Version,
+				id: model.DeleteId{Id: account.ID, Version: *account.Version},
 			},
 			wantDeleted:   false,
-			wantErrorData: client_error.NewNotFound("Specified resource does not exist"),
+			wantErrorData: model.NewNotFound("Specified resource does not exist"),
 		},
 		{
 			name: "conflict for existing id but non existing version",
 			args: args{
-				id:      account.ID,
-				version: 10,
+				id: model.DeleteId{Id: account.ID, Version: 10},
 			},
 			wantDeleted:   false,
-			wantErrorData: client_error.NewConflict("Specified version incorrect"),
+			wantErrorData: model.NewConflict("Specified version incorrect"),
 		},
 	}
 	for _, tt := range tests {
@@ -63,7 +60,7 @@ func TestAccountHttpClient_Delete(t *testing.T) {
 				}
 			}
 
-			gotDeleted, gotErrorData := accountHttpClient.Delete(tt.args.id, tt.args.version)
+			gotDeleted, gotErrorData := accountHttpClient.Delete(tt.args.id)
 
 			if gotDeleted != tt.wantDeleted {
 				t.Errorf("Delete() gotDeleted = %v, want %v", gotDeleted, tt.wantDeleted)

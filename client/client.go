@@ -3,7 +3,6 @@ package client
 import (
 	runtime "github.com/banzaicloud/logrus-runtime-formatter"
 	"github.com/illuque/account-api-client/model"
-	"github.com/illuque/account-api-client/model/client_error"
 	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
 	"net/http"
@@ -14,9 +13,9 @@ import (
 // TODO:I Test this
 
 type AccountClient interface {
-	Create(account model.AccountData) (createdAccount *model.AccountData, errorData *client_error.ErrorData)
-	Fetch(id string) (account *model.AccountData, errorData *client_error.ErrorData)
-	Delete(id string, version int64) (deleted bool, errorData *client_error.ErrorData)
+	Create(account model.AccountData) (createdAccount *model.AccountData, errorData *model.ErrorData)
+	Fetch(id string) (account *model.AccountData, errorData *model.ErrorData)
+	Delete(id model.DeleteId) (deleted bool, errorData *model.ErrorData)
 }
 
 type AccountHttpClient struct {
@@ -40,7 +39,7 @@ func NewAccountApiClient(uri string, timeout time.Duration) AccountClient {
 	return AccountHttpClient{
 		httpClient: &http.Client{
 			Timeout: timeout,
-		}, // TODO:I ver si hay una manera mejor de inicializarlo
+		},
 		uri:         uri,
 		contentType: "application/vnd.api+json",
 		logger:      logger,

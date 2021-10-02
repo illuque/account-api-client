@@ -2,7 +2,6 @@ package client
 
 import (
 	"github.com/illuque/account-api-client/model"
-	"github.com/illuque/account-api-client/model/client_error"
 	"reflect"
 	"testing"
 	"time"
@@ -22,7 +21,7 @@ func TestAccountHttpClient_Create(t *testing.T) {
 		args               args
 		wantCreatedAccount *model.AccountData
 		wantAccount        *model.AccountData
-		wantErrorData      *client_error.ErrorData
+		wantErrorData      *model.ErrorData
 	}{
 		{
 			name: "succeeds when valid payload and first version",
@@ -36,14 +35,14 @@ func TestAccountHttpClient_Create(t *testing.T) {
 			args: args{
 				buildNewAccount(),
 			},
-			wantErrorData: client_error.NewConflict("Specified account already exists"),
+			wantErrorData: model.NewConflict("Specified account already exists"),
 		},
 		{
 			name: "bad request when name not provided",
 			args: args{
 				buildAccountWithoutName(),
 			},
-			wantErrorData: client_error.NewBadRequest("Wrong parameter(s) provided"),
+			wantErrorData: model.NewBadRequest("Wrong parameter(s) provided"),
 		},
 	}
 	for _, tt := range tests {
