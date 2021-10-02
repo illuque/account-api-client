@@ -18,17 +18,26 @@ func (ac AccountHttpClient) Fetch(id string) (account *model.AccountData, errorD
 		return
 	}
 
-	if response.StatusCode != http.StatusOK {
-		// TODO:I revisar todos los tipos
-		errorData = ac.ProcessErrorResponse(response)
-		return
+	switch response.StatusCode {
+	case http.StatusOK:
+		account, errorData = ac.getFetchedAccountFromResponse(response)
+	case http.StatusBadRequest:
+		errorData = client_error.NewBadRequest("Wrong id parameter format")
+	case http.StatusNotFound:
+		errorData = client_error.NewNotFound("Specified resource does not exist")
+	default:
+		errorMsg, _ := ac.getErrorFromResponse(response)
+		errorData = client_error.NewUnknownClientError("Unknown error code received from API on GET: " + errorMsg)
 	}
 
-	account, err = ac.GetAccountFromResponse(response)
+	return
+}
+
+func (ac AccountHttpClient) getFetchedAccountFromResponse(response *http.Response) (account *model.AccountData, errorData *client_error.ErrorData) {
+	account, err := ac.getAccountFromResponse(response)
 	if err != nil {
 		errorData = client_error.NewUnknownClientError("Unknown error parsing API GET response")
 		return
 	}
-
 	return
 }

@@ -34,7 +34,8 @@ func (ac AccountHttpClient) Delete(id string, version int64) (deleted bool, erro
 	case http.StatusConflict:
 		errorData = client_error.NewConflict("Specified version incorrect")
 	default:
-		errorData = client_error.NewUnknownClientError("Unknown error code received from API")
+		errorMsg, _ := ac.getErrorFromResponse(response)
+		errorData = client_error.NewUnknownClientError("Unknown error code received from API on DELETE: " + errorMsg)
 	}
 
 	return

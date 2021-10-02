@@ -2,6 +2,7 @@ package client
 
 import (
 	"github.com/illuque/account-api-client/model/client_error"
+	"reflect"
 	"testing"
 	"time"
 )
@@ -47,14 +48,14 @@ func TestAccountHttpClient_Delete(t *testing.T) {
 				version: 10,
 			},
 			wantDeleted:   false,
-			wantErrorData: client_error.NewNotFound("Specified version incorrect"),
+			wantErrorData: client_error.NewConflict("Specified version incorrect"),
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
 			switch tt.name {
-			case "removed correctly when existing for id and versions":
+			case "removed correctly when existing for id and versions", "conflict for existing id but non existing version":
 				// TODO:I meter en un seed en vez de ejecutar a mano!
 				_, err := accountHttpClient.Create(account)
 				if err != nil {
@@ -63,10 +64,12 @@ func TestAccountHttpClient_Delete(t *testing.T) {
 			}
 
 			gotDeleted, gotErrorData := accountHttpClient.Delete(tt.args.id, tt.args.version)
+
 			if gotDeleted != tt.wantDeleted {
 				t.Errorf("Delete() gotDeleted = %v, want %v", gotDeleted, tt.wantDeleted)
 			}
-			if (gotErrorData != nil) && (gotErrorData.Code != tt.wantErrorData.Code || gotErrorData.Retryable != tt.wantErrorData.Retryable) {
+
+			if !reflect.DeepEqual(gotErrorData, tt.wantErrorData) {
 				t.Errorf("Delete() gotErrorData = %v, want %v", gotErrorData, tt.wantErrorData)
 				return
 			}

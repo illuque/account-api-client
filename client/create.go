@@ -31,15 +31,20 @@ func (ac AccountHttpClient) Create(accountData model.AccountData) (createdAccoun
 		return
 	}
 
-	if response.StatusCode != http.StatusCreated {
-		errorData = ac.ProcessErrorResponse(response)
-		return
-	}
-
-	createdAccount, err = ac.GetAccountFromResponse(response)
-	if err != nil {
-		errorData = client_error.NewUnknownClientError("Unknown error parsing API POST response")
-		return
+	switch response.StatusCode {
+	case http.StatusCreated:
+		createdAccount, err = ac.getAccountFromResponse(response)
+		if err != nil {
+			errorData = client_error.NewUnknownClientError("Unknown error parsing API POST response")
+			return
+		}
+	case http.StatusBadRequest:
+		errorData = client_error.NewBadRequest("Wrong parameter(s) provided")
+	case http.StatusConflict:
+		errorData = client_error.NewConflict("Specified account already exists")
+	default:
+		errorMsg, _ := ac.getErrorFromResponse(response)
+		errorData = client_error.NewUnknownClientError("Unknown error code received from API on POST: " + errorMsg)
 	}
 
 	return

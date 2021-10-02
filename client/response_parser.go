@@ -2,25 +2,12 @@ package client
 
 import (
 	"encoding/json"
-	"errors"
-	"fmt"
 	"github.com/illuque/account-api-client/model"
-	"github.com/illuque/account-api-client/model/client_error"
 	"io/ioutil"
 	"net/http"
 )
 
-// TODO:I remove
-func (ac AccountHttpClient) ProcessErrorResponse(response *http.Response) *client_error.ErrorData {
-	apiErrMsg, _ := ac.getErrorFromResponse(response)
-	errMsg := fmt.Sprintf("API error with code '%d', message '%s'", response.StatusCode, apiErrMsg)
-	err := errors.New(errMsg)
-	ac.logger.WithError(err).Errorf("API responded '%d' on Create", response.StatusCode)
-
-	return client_error.NewFromApiError(response.StatusCode, apiErrMsg)
-}
-
-func (ac AccountHttpClient) GetAccountFromResponse(response *http.Response) (responseAccount *model.AccountData, parseError error) {
+func (ac AccountHttpClient) getAccountFromResponse(response *http.Response) (responseAccount *model.AccountData, parseError error) {
 	defer response.Body.Close()
 
 	bodyBytes, parseError := ioutil.ReadAll(response.Body)

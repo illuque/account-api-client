@@ -3,6 +3,7 @@ package client
 import (
 	"github.com/illuque/account-api-client/model"
 	"github.com/illuque/account-api-client/model/client_error"
+	"reflect"
 	"testing"
 	"time"
 )
@@ -14,56 +15,56 @@ func TestAccountHttpClient_Create(t *testing.T) {
 		accountData model.AccountData
 	}
 
-	accountForOk := buildNewAccount()
+	account := buildNewAccount()
 
 	tests := []struct {
 		name               string
 		args               args
 		wantCreatedAccount *model.AccountData
-		wantId             string
-		wantErrData        *client_error.ErrorData
+		wantAccount        *model.AccountData
+		wantErrorData      *client_error.ErrorData
 	}{
 		{
-			name: "succeeds when valid payload",
+			name: "succeeds when valid payload and first version",
 			args: args{
-				accountForOk,
+				account,
 			},
-			wantId: accountForOk.ID,
+			wantAccount: &account,
 		},
 		{
-			name: "fails when duplicated account is created",
+			name: "conflict when duplicated account is created",
 			args: args{
 				buildNewAccount(),
 			},
-			wantErrData: client_error.NewFromApiError(409, "Account cannot be created as it violates a duplicate constraint"),
+			wantErrorData: client_error.NewConflict("Specified account already exists"),
 		},
 		{
-			name: "fails when name not provided",
+			name: "bad request when name not provided",
 			args: args{
 				buildAccountWithoutName(),
 			},
-			wantErrData: client_error.NewBadRequest("name in body is required"),
+			wantErrorData: client_error.NewBadRequest("Wrong parameter(s) provided"),
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 
-			gotCreatedAccount, gotErrData := accountHttpClient.Create(tt.args.accountData)
+			gotCreatedAccount, gotErrorData := accountHttpClient.Create(tt.args.accountData)
 
 			switch tt.name {
-			case "fails when duplicated account is created":
+			case "conflict when duplicated account is created":
 				// run again to generate duplicate
 				// TODO:I meter en un seed en vez de ejecutar a mano!
-				gotCreatedAccount, gotErrData = accountHttpClient.Create(tt.args.accountData)
+				gotCreatedAccount, gotErrorData = accountHttpClient.Create(tt.args.accountData)
 			}
 
-			if (gotErrData != nil) && (gotErrData.Code != tt.wantErrData.Code || gotErrData.Retryable != tt.wantErrData.Retryable) {
-				t.Errorf("Create() client_error = %+v, wantErrData %+v", gotErrData, tt.wantErrData)
+			if !reflect.DeepEqual(gotCreatedAccount, tt.wantAccount) {
+				t.Errorf("Create() gotCreatedAccount = %v, want %v", gotCreatedAccount, tt.wantAccount)
+			}
+
+			if (gotErrorData != nil) && !reflect.DeepEqual(gotErrorData, tt.wantErrorData) {
+				t.Errorf("Create() client_error = %+v, wantErrorData %+v", gotErrorData, tt.wantErrorData)
 				return
-			}
-
-			if tt.wantId != "" && tt.wantId != gotCreatedAccount.ID { // TODO:I probar de nuevo con el deepEqual
-				t.Errorf("Create() gotCreatedAccount = %s, want %s", gotCreatedAccount.ID, tt.wantId)
 			}
 		})
 	}

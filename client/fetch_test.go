@@ -37,14 +37,14 @@ func TestAccountHttpClient_Fetch(t *testing.T) {
 				id: uuid.New().String(),
 			},
 			wantAccount:   nil,
-			wantErrorData: client_error.NewFromApiError(404, "whatever"),
+			wantErrorData: client_error.NewNotFound("Specified resource does not exist"),
 		}, {
 			name: "bad request when invalid id",
 			args: args{
 				id: "fake id",
 			},
 			wantAccount:   nil,
-			wantErrorData: client_error.NewFromApiError(400, "whatever"),
+			wantErrorData: client_error.NewBadRequest("Wrong id parameter format"),
 		},
 	}
 	for _, tt := range tests {
@@ -60,10 +60,12 @@ func TestAccountHttpClient_Fetch(t *testing.T) {
 			}
 
 			gotAccount, gotErrorData := accountHttpClient.Fetch(tt.args.id)
+
 			if !reflect.DeepEqual(gotAccount, tt.wantAccount) {
 				t.Errorf("Fetch() gotAccount = %v, want %v", gotAccount, tt.wantAccount)
 			}
-			if (gotErrorData != nil) && (gotErrorData.Code != tt.wantErrorData.Code || gotErrorData.Retryable != tt.wantErrorData.Retryable) {
+
+			if !reflect.DeepEqual(gotErrorData, tt.wantErrorData) {
 				t.Errorf("Fetch() gotErrorData = %v, want %v", gotErrorData, tt.wantErrorData)
 				return
 			}
