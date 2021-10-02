@@ -14,8 +14,9 @@ import (
 // TODO:I Test this
 
 type AccountClient interface {
-	Create(account model.AccountData) (*model.AccountData, *client_error.ErrorData)
-	Fetch(id string) (*model.AccountData, *client_error.ErrorData)
+	Create(account model.AccountData) (createdAccount *model.AccountData, errorData *client_error.ErrorData)
+	Fetch(id string) (account *model.AccountData, errorData *client_error.ErrorData)
+	Delete(id string, version int64) (deleted bool, errorData *client_error.ErrorData)
 }
 
 type AccountHttpClient struct {

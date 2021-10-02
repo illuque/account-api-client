@@ -19,6 +19,7 @@ func (ac AccountHttpClient) Fetch(id string) (account *model.AccountData, errorD
 	}
 
 	if response.StatusCode != http.StatusOK {
+		// TODO:I revisar todos los tipos
 		errorData = ac.ProcessErrorResponse(response)
 		return
 	}

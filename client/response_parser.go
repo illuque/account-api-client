@@ -10,6 +10,7 @@ import (
 	"net/http"
 )
 
+// TODO:I remove
 func (ac AccountHttpClient) ProcessErrorResponse(response *http.Response) *client_error.ErrorData {
 	apiErrMsg, _ := ac.getErrorFromResponse(response)
 	errMsg := fmt.Sprintf("API error with code '%d', message '%s'", response.StatusCode, apiErrMsg)
