@@ -4,11 +4,10 @@ import (
 	model2 "github.com/illuque/account-api-client/client/model"
 	"reflect"
 	"testing"
-	"time"
 )
 
 func TestAccountHttpClient_Delete(t *testing.T) {
-	accountHttpClient := NewAccountApiClient("http://localhost:8080/v1/organisation/accounts", 2*time.Second)
+	accountHttpClient := buildClient()
 
 	type args struct {
 		id      model2.DeleteId
@@ -28,7 +27,7 @@ func TestAccountHttpClient_Delete(t *testing.T) {
 			args: args{
 				id: model2.DeleteId{Id: account.ID, Version: *account.Version},
 			},
-			wantDeleted:   false,
+			wantDeleted:   true,
 			wantErrorData: nil,
 		},
 		{
