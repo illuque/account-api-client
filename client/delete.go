@@ -2,11 +2,11 @@ package client
 
 import (
 	"fmt"
-	"github.com/illuque/account-api-client/model"
+	model2 "github.com/illuque/account-api-client/client/model"
 	"net/http"
 )
 
-func (ac AccountHttpClient) Delete(id model.DeleteId) (deleted bool, errorData *model.ErrorData) {
+func (ac AccountHttpClient) Delete(id model2.DeleteId) (deleted bool, errorData *model2.ErrorData) {
 	ac.logger.Debugf("Calling API for Delete with id [%+v]", id)
 
 	deleteUri := fmt.Sprintf("%s/%s?version=%d", ac.uri, id.Id, id.Version)
@@ -29,12 +29,12 @@ func (ac AccountHttpClient) Delete(id model.DeleteId) (deleted bool, errorData *
 	case http.StatusNoContent:
 		deleted = true
 	case http.StatusNotFound:
-		errorData = model.NewNotFound("Specified resource does not exist")
+		errorData = model2.NewNotFound("Specified resource does not exist")
 	case http.StatusConflict:
-		errorData = model.NewConflict("Specified version incorrect")
+		errorData = model2.NewConflict("Specified version incorrect")
 	default:
 		errorMsg, _ := ac.getErrorFromResponse(response)
-		errorData = model.NewUnknownClientError("Unknown error code received from API on DELETE: " + errorMsg)
+		errorData = model2.NewUnknownClientError("Unknown error code received from API on DELETE: " + errorMsg)
 	}
 
 	return

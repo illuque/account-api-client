@@ -2,7 +2,7 @@ package client
 
 import (
 	"github.com/google/uuid"
-	"github.com/illuque/account-api-client/model"
+	"github.com/illuque/account-api-client/client/model"
 )
 
 func buildNewAccount() model.AccountData {

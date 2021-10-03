@@ -1,7 +1,7 @@
 package client
 
 import (
-	"github.com/illuque/account-api-client/model"
+	model2 "github.com/illuque/account-api-client/client/model"
 	"reflect"
 	"testing"
 	"time"
@@ -11,7 +11,7 @@ func TestAccountHttpClient_Create(t *testing.T) {
 	accountHttpClient := NewAccountApiClient("http://localhost:8080/v1/organisation/accounts", 2*time.Second)
 
 	type args struct {
-		accountData model.AccountData
+		accountData model2.AccountData
 	}
 
 	account := buildNewAccount()
@@ -19,9 +19,9 @@ func TestAccountHttpClient_Create(t *testing.T) {
 	tests := []struct {
 		name               string
 		args               args
-		wantCreatedAccount *model.AccountData
-		wantAccount        *model.AccountData
-		wantErrorData      *model.ErrorData
+		wantCreatedAccount *model2.AccountData
+		wantAccount        *model2.AccountData
+		wantErrorData      *model2.ErrorData
 	}{
 		{
 			name: "succeeds when valid payload and first version",
@@ -35,14 +35,14 @@ func TestAccountHttpClient_Create(t *testing.T) {
 			args: args{
 				buildNewAccount(),
 			},
-			wantErrorData: model.NewConflict("Specified account already exists"),
+			wantErrorData: model2.NewConflict("Specified account already exists"),
 		},
 		{
 			name: "bad request when name not provided",
 			args: args{
 				buildAccountWithoutName(),
 			},
-			wantErrorData: model.NewBadRequest("Wrong parameter(s) provided"),
+			wantErrorData: model2.NewBadRequest("Wrong parameter(s) provided"),
 		},
 	}
 	for _, tt := range tests {
@@ -69,7 +69,7 @@ func TestAccountHttpClient_Create(t *testing.T) {
 	}
 }
 
-func buildAccountWithoutName() model.AccountData {
+func buildAccountWithoutName() model2.AccountData {
 	account := buildNewAccount()
 	account.Attributes.Name = nil
 	return account

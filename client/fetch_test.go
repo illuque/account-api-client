@@ -2,7 +2,7 @@ package client
 
 import (
 	"github.com/google/uuid"
-	"github.com/illuque/account-api-client/model"
+	model2 "github.com/illuque/account-api-client/client/model"
 	"reflect"
 	"testing"
 	"time"
@@ -20,8 +20,8 @@ func TestAccountHttpClient_Fetch(t *testing.T) {
 	tests := []struct {
 		name          string
 		args          args
-		wantAccount   *model.AccountData
-		wantErrorData *model.ErrorData
+		wantAccount   *model2.AccountData
+		wantErrorData *model2.ErrorData
 	}{
 		{
 			name: "retrieved when existing",
@@ -36,14 +36,14 @@ func TestAccountHttpClient_Fetch(t *testing.T) {
 				id: uuid.New().String(),
 			},
 			wantAccount:   nil,
-			wantErrorData: model.NewNotFound("Specified resource does not exist"),
+			wantErrorData: model2.NewNotFound("Specified resource does not exist"),
 		}, {
 			name: "bad request when invalid id",
 			args: args{
 				id: "fake id",
 			},
 			wantAccount:   nil,
-			wantErrorData: model.NewBadRequest("Wrong id parameter format"),
+			wantErrorData: model2.NewBadRequest("Wrong id parameter format"),
 		},
 	}
 	for _, tt := range tests {

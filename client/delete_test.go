@@ -1,7 +1,7 @@
 package client
 
 import (
-	"github.com/illuque/account-api-client/model"
+	model2 "github.com/illuque/account-api-client/client/model"
 	"reflect"
 	"testing"
 	"time"
@@ -11,7 +11,7 @@ func TestAccountHttpClient_Delete(t *testing.T) {
 	accountHttpClient := NewAccountApiClient("http://localhost:8080/v1/organisation/accounts", 2*time.Second)
 
 	type args struct {
-		id      model.DeleteId
+		id      model2.DeleteId
 		version int64
 	}
 
@@ -21,31 +21,31 @@ func TestAccountHttpClient_Delete(t *testing.T) {
 		name          string
 		args          args
 		wantDeleted   bool
-		wantErrorData *model.ErrorData
+		wantErrorData *model2.ErrorData
 	}{
 		{
 			name: "removed correctly when existing for id and versions",
 			args: args{
-				id: model.DeleteId{Id: account.ID, Version: *account.Version},
+				id: model2.DeleteId{Id: account.ID, Version: *account.Version},
 			},
-			wantDeleted:   true,
+			wantDeleted:   false,
 			wantErrorData: nil,
 		},
 		{
 			name: "not found when non existing id",
 			args: args{
-				id: model.DeleteId{Id: account.ID, Version: *account.Version},
+				id: model2.DeleteId{Id: account.ID, Version: *account.Version},
 			},
 			wantDeleted:   false,
-			wantErrorData: model.NewNotFound("Specified resource does not exist"),
+			wantErrorData: model2.NewNotFound("Specified resource does not exist"),
 		},
 		{
 			name: "conflict for existing id but non existing version",
 			args: args{
-				id: model.DeleteId{Id: account.ID, Version: 10},
+				id: model2.DeleteId{Id: account.ID, Version: 10},
 			},
 			wantDeleted:   false,
-			wantErrorData: model.NewConflict("Specified version incorrect"),
+			wantErrorData: model2.NewConflict("Specified version incorrect"),
 		},
 	}
 	for _, tt := range tests {
