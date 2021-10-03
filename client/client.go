@@ -23,7 +23,6 @@ type AccountHttpClient struct {
 	logger      *logrus.Logger
 }
 
-// TODO:I decir en README q esta es la manera de instanciar el cliente
 func NewAccountApiClient(uri string, timeout time.Duration) AccountClient {
 	logger := &logrus.Logger{
 		Out:   os.Stderr,
