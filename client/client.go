@@ -2,7 +2,7 @@ package client
 
 import (
 	runtime "github.com/banzaicloud/logrus-runtime-formatter"
-	model2 "github.com/illuque/account-api-client/client/model"
+	"github.com/illuque/account-api-client/client/model"
 	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
 	"net/http"
@@ -11,9 +11,9 @@ import (
 )
 
 type AccountClient interface {
-	Create(account model2.AccountData) (createdAccount *model2.AccountData, errorData *model2.ErrorData)
-	Fetch(id string) (account *model2.AccountData, errorData *model2.ErrorData)
-	Delete(id model2.DeleteId) (deleted bool, errorData *model2.ErrorData)
+	Create(account model.AccountData) (createdAccount *model.AccountData, err error)
+	Fetch(id string) (account *model.AccountData, err error)
+	Delete(id model.DeleteId) (deleted bool, err error)
 }
 
 type AccountHttpClient struct {
@@ -23,6 +23,7 @@ type AccountHttpClient struct {
 	logger      *logrus.Logger
 }
 
+// TODO:I decir en README q esta es la manera de instanciar el cliente
 func NewAccountApiClient(uri string, timeout time.Duration) AccountClient {
 	logger := &logrus.Logger{
 		Out:   os.Stderr,

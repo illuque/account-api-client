@@ -2,12 +2,12 @@ package client
 
 import (
 	"encoding/json"
-	model2 "github.com/illuque/account-api-client/client/model"
+	"github.com/illuque/account-api-client/client/model"
 	"io/ioutil"
 	"net/http"
 )
 
-func (ac AccountHttpClient) getAccountFromResponse(response *http.Response) (responseAccount *model2.AccountData, parseError error) {
+func (ac AccountHttpClient) getAccountFromResponse(response *http.Response) (responseAccount *model.AccountData, parseError error) {
 	defer response.Body.Close()
 
 	bodyBytes, parseError := ioutil.ReadAll(response.Body)
@@ -36,7 +36,7 @@ func (ac AccountHttpClient) getErrorFromResponse(response *http.Response) (error
 		return
 	}
 
-	var apiErrorBody model2.ApiErrorBody
+	var apiErrorBody model.ApiErrorBody
 	if parseError = json.Unmarshal(bodyBytes, &apiErrorBody); parseError != nil {
 		ac.logger.WithError(parseError).Errorf("Error reading error response as ApiErrorBody")
 		return

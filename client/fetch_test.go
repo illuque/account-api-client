@@ -2,7 +2,7 @@ package client
 
 import (
 	"github.com/google/uuid"
-	model2 "github.com/illuque/account-api-client/client/model"
+	"github.com/illuque/account-api-client/client/model"
 	"reflect"
 	"testing"
 )
@@ -17,32 +17,32 @@ func TestAccountHttpClient_Fetch(t *testing.T) {
 	account := buildNewAccount()
 
 	tests := []struct {
-		name          string
-		args          args
-		wantAccount   *model2.AccountData
-		wantErrorData *model2.ErrorData
+		name        string
+		args        args
+		wantAccount *model.AccountData
+		wantErr     error
 	}{
 		{
 			name: "retrieved when existing",
 			args: args{
 				id: account.ID,
 			},
-			wantAccount:   &account,
-			wantErrorData: nil,
+			wantAccount: &account,
+			wantErr:     nil,
 		}, {
 			name: "not found when not existing",
 			args: args{
 				id: uuid.New().String(),
 			},
-			wantAccount:   nil,
-			wantErrorData: model2.NewNotFound("Specified resource does not exist"),
+			wantAccount: nil,
+			wantErr:     model.NewNotFound("Specified resource does not exist"),
 		}, {
 			name: "bad request when invalid id",
 			args: args{
 				id: "fake id",
 			},
-			wantAccount:   nil,
-			wantErrorData: model2.NewBadRequest("Wrong id parameter format"),
+			wantAccount: nil,
+			wantErr:     model.NewBadRequest("Wrong id parameter format"),
 		},
 	}
 	for _, tt := range tests {
@@ -50,21 +50,21 @@ func TestAccountHttpClient_Fetch(t *testing.T) {
 
 			switch tt.name {
 			case "retrieved when existing":
-				// TODO:I meter en un seed en vez de ejecutar a mano!
+				// create one to ensure existing
 				_, err := accountHttpClient.Create(account)
 				if err != nil {
 					t.FailNow()
 				}
 			}
 
-			gotAccount, gotErrorData := accountHttpClient.Fetch(tt.args.id)
+			gotAccount, gotErr := accountHttpClient.Fetch(tt.args.id)
 
 			if !reflect.DeepEqual(gotAccount, tt.wantAccount) {
 				t.Errorf("Fetch() gotAccount = %v, want %v", gotAccount, tt.wantAccount)
 			}
 
-			if !reflect.DeepEqual(gotErrorData, tt.wantErrorData) {
-				t.Errorf("Fetch() gotErrorData = %v, want %v", gotErrorData, tt.wantErrorData)
+			if !reflect.DeepEqual(gotErr, tt.wantErr) {
+				t.Errorf("Fetch() gotErr = %v, want %v", gotErr, tt.wantErr)
 				return
 			}
 		})

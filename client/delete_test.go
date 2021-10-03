@@ -1,7 +1,7 @@
 package client
 
 import (
-	model2 "github.com/illuque/account-api-client/client/model"
+	"github.com/illuque/account-api-client/client/model"
 	"reflect"
 	"testing"
 )
@@ -10,41 +10,41 @@ func TestAccountHttpClient_Delete(t *testing.T) {
 	accountHttpClient := buildClient()
 
 	type args struct {
-		id      model2.DeleteId
+		id      model.DeleteId
 		version int64
 	}
 
 	account := buildNewAccount()
 
 	tests := []struct {
-		name          string
-		args          args
-		wantDeleted   bool
-		wantErrorData *model2.ErrorData
+		name        string
+		args        args
+		wantDeleted bool
+		wantErr     error
 	}{
 		{
 			name: "removed correctly when existing for id and versions",
 			args: args{
-				id: model2.DeleteId{Id: account.ID, Version: *account.Version},
+				id: model.DeleteId{Id: account.ID, Version: *account.Version},
 			},
-			wantDeleted:   true,
-			wantErrorData: nil,
+			wantDeleted: true,
+			wantErr:     nil,
 		},
 		{
 			name: "not found when non existing id",
 			args: args{
-				id: model2.DeleteId{Id: account.ID, Version: *account.Version},
+				id: model.DeleteId{Id: account.ID, Version: *account.Version},
 			},
-			wantDeleted:   false,
-			wantErrorData: model2.NewNotFound("Specified resource does not exist"),
+			wantDeleted: false,
+			wantErr:     model.NewNotFound("Specified resource does not exist"),
 		},
 		{
 			name: "conflict for existing id but non existing version",
 			args: args{
-				id: model2.DeleteId{Id: account.ID, Version: 10},
+				id: model.DeleteId{Id: account.ID, Version: 10},
 			},
-			wantDeleted:   false,
-			wantErrorData: model2.NewConflict("Specified version incorrect"),
+			wantDeleted: false,
+			wantErr:     model.NewConflict("Specified version incorrect"),
 		},
 	}
 	for _, tt := range tests {
@@ -52,21 +52,21 @@ func TestAccountHttpClient_Delete(t *testing.T) {
 
 			switch tt.name {
 			case "removed correctly when existing for id and versions", "conflict for existing id but non existing version":
-				// TODO:I meter en un seed en vez de ejecutar a mano!
+				// create one to ensure existing
 				_, err := accountHttpClient.Create(account)
 				if err != nil {
 					t.FailNow()
 				}
 			}
 
-			gotDeleted, gotErrorData := accountHttpClient.Delete(tt.args.id)
+			gotDeleted, gotErr := accountHttpClient.Delete(tt.args.id)
 
 			if gotDeleted != tt.wantDeleted {
 				t.Errorf("Delete() gotDeleted = %v, want %v", gotDeleted, tt.wantDeleted)
 			}
 
-			if !reflect.DeepEqual(gotErrorData, tt.wantErrorData) {
-				t.Errorf("Delete() gotErrorData = %v, want %v", gotErrorData, tt.wantErrorData)
+			if !reflect.DeepEqual(gotErr, tt.wantErr) {
+				t.Errorf("Delete() gotErr = %v, want %v", gotErr, tt.wantErr)
 				return
 			}
 		})
